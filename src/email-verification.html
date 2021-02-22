@@ -1,0 +1,41 @@
+<html lang="en">
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    </head>    
+    <body>
+        <script>
+            $(function() {
+                console.log( "ready!" );
+                var urlParams = new URLSearchParams(window.location.search);
+                var code = urlParams.get('code');
+                var email = urlParams.get('email');
+                var has_env = urlParams.has('env');
+                var api_endpoint = has_env ? 'api-staging.cooby.co' : 'api.cooby.co';
+                $.ajax({
+                url: "https://" + api_endpoint + "/users/email:verify",
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                    validation_code: code,
+                    email: email
+                })})
+                .done(function() {
+                    $("#verify-text").text("Your email " + email + " is verified successfully!")
+                    console.log( "success" );
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    console.log(jqXHR.status);
+                    console.log( "error" );
+                    text = "Fail to verify email " + email;
+                    if (jqXHR.status == 404) {
+                        text = email + " is not found"
+                    } else if (jqXHR.status == 409) {
+                        text = email + " has been verified already."
+                    }
+                    $("#verify-text").text(text)
+                });
+            });
+        </script>
+        <h3 id="verify-text">Verifying your email</h3>
+    </body>
+</html>
